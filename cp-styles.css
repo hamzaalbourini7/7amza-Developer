@@ -1,0 +1,163 @@
+/* === CONTROL PANEL STYLES - NO EXTERNAL DEPENDENCIES === */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Cairo',sans-serif}
+html{font-size:16px}
+body{background:#0A0A0A;color:#fff;min-height:100vh;-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+input,select,textarea,button{font-family:'Cairo',sans-serif;font-size:inherit}
+a{text-decoration:none;color:inherit}
+
+/* Layout */
+.hidden{display:none!important}
+.cp-center{display:flex;align-items:center;justify-content:center}
+.cp-wrap{max-width:1100px;margin:0 auto;padding:16px}
+.cp-grid{display:grid;gap:16px}
+.cp-grid-2{grid-template-columns:1fr 1fr}
+.cp-grid-3{grid-template-columns:1fr 1fr 1fr}
+.cp-grid-4{grid-template-columns:1fr 1fr 1fr 1fr}
+.cp-flex{display:flex;align-items:center}
+.cp-between{justify-content:space-between}
+.cp-gap{gap:8px}
+.cp-gap2{gap:16px}
+.cp-col{flex-direction:column}
+.cp-grow{flex:1}
+.cp-shrink0{flex-shrink:0}
+.cp-wrap-f{flex-wrap:wrap}
+.cp-min0{min-width:0}
+.cp-text-center{text-align:center}
+.cp-text-right{text-align:right}
+.cp-relative{position:relative}
+.cp-sticky{position:sticky;top:0;z-index:40}
+.cp-fixed{position:fixed}
+.cp-inset{top:0;right:0;bottom:0;left:0}
+.cp-z50{z-index:50}
+.cp-overflow{overflow:hidden}
+
+/* Glass Effect */
+.glass{background:rgba(26,26,26,0.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.05);border-radius:16px}
+
+/* Typography */
+.cp-gold{color:#D4AF37}
+.cp-green{color:#4ade80}
+.cp-red{color:#f87171}
+.cp-blue{color:#60a5fa}
+.cp-gray{color:#9ca3af}
+.cp-gray2{color:#6b7280}
+.cp-gray3{color:#4b5563}
+.cp-white{color:#fff}
+.cp-bold{font-weight:700}
+.cp-black{font-weight:900}
+.cp-text-xs{font-size:11px}
+.cp-text-sm{font-size:13px}
+.cp-text-md{font-size:15px}
+.cp-text-lg{font-size:18px}
+.cp-text-xl{font-size:22px}
+.cp-text-2xl{font-size:28px}
+.cp-text-3xl{font-size:36px}
+.cp-text-5xl{font-size:48px}
+.gold-text{background:linear-gradient(135deg,#D4AF37,#F0D060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* Spacing */
+.cp-p2{padding:8px}
+.cp-p3{padding:12px}
+.cp-p4{padding:16px}
+.cp-p6{padding:24px}
+.cp-p8{padding:32px}
+.cp-px2{padding-left:8px;padding-right:8px}
+.cp-px3{padding-left:12px;padding-right:12px}
+.cp-px4{padding-left:16px;padding-right:16px}
+.cp-py1{padding-top:4px;padding-bottom:4px}
+.cp-py2{padding-top:8px;padding-bottom:8px}
+.cp-py3{padding-top:12px;padding-bottom:12px}
+.cp-mb1{margin-bottom:4px}
+.cp-mb2{margin-bottom:8px}
+.cp-mb3{margin-bottom:12px}
+.cp-mb4{margin-bottom:16px}
+.cp-mb6{margin-bottom:24px}
+.cp-mt2{margin-top:8px}
+.cp-mt4{margin-top:16px}
+
+/* Buttons */
+.cp-btn{border:none;cursor:pointer;border-radius:12px;padding:8px 16px;font-weight:700;transition:all 0.2s;display:inline-flex;align-items:center;justify-content:center;gap:4px}
+.cp-btn:active{transform:scale(0.97)}
+.cp-btn-gold{background:#D4AF37;color:#0A0A0A}
+.cp-btn-gold:hover{background:#F0D060}
+.cp-btn-green{background:rgba(34,197,94,0.1);color:#4ade80;border:1px solid rgba(34,197,94,0.3)}
+.cp-btn-green:hover{background:rgba(34,197,94,0.2)}
+.cp-btn-red{background:rgba(239,68,68,0.1);color:#f87171;border:1px solid rgba(239,68,68,0.3)}
+.cp-btn-red:hover{background:rgba(239,68,68,0.2)}
+.cp-btn-blue{background:rgba(59,130,246,0.1);color:#60a5fa}
+.cp-btn-blue:hover{background:rgba(59,130,246,0.2)}
+.cp-btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.1);color:#9ca3af}
+.cp-btn-outline:hover{border-color:#D4AF37;color:#D4AF37}
+
+/* Inputs */
+.cp-input{width:100%;background:#222;border:1px solid #333;border-radius:12px;padding:10px 14px;color:#fff;outline:none;transition:border-color 0.2s}
+.cp-input:focus{border-color:#D4AF37}
+.cp-input::placeholder{color:#666}
+
+/* Cards */
+.cp-card{background:rgba(26,26,26,0.6);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:24px}
+.cp-card-gold{border-color:rgba(212,175,55,0.2)}
+
+/* Booking Rows */
+.booking-row{border-bottom:1px solid rgba(255,255,255,0.05);padding:12px;transition:background 0.2s}
+.booking-row:hover{background:rgba(212,175,55,0.05)}
+.booking-row:last-child{border-bottom:none}
+
+/* Badges */
+.badge{padding:2px 8px;border-radius:6px;font-size:10px;font-weight:700;display:inline-block}
+.badge-new{background:rgba(212,175,55,0.1);color:#D4AF37}
+.badge-done{background:rgba(34,197,94,0.1);color:#4ade80}
+.badge-cancel{background:rgba(239,68,68,0.1);color:#f87171}
+
+/* Progress Bar */
+.cp-bar-bg{width:100%;background:#222;border-radius:999px;height:6px;overflow:hidden}
+.cp-bar{background:#D4AF37;height:100%;border-radius:999px;transition:width 0.3s}
+
+/* Login */
+.login-wrap{position:fixed;inset:0;z-index:50;background:#0A0A0A;display:flex;align-items:center;justify-content:center;padding:16px}
+.login-box{width:100%;max-width:380px;padding:32px;text-align:center;border-color:rgba(212,175,55,0.2)}
+
+/* Nav */
+.cp-nav{border-bottom:1px solid rgba(255,255,255,0.05);padding:12px 16px}
+
+/* Action buttons in rows */
+.row-actions{display:flex;flex-direction:column;gap:4px}
+.row-action{font-size:11px;padding:4px 8px;border-radius:8px;border:none;cursor:pointer;text-align:center;white-space:nowrap;transition:all 0.2s}
+.row-action:active{transform:scale(0.95)}
+.row-done{background:rgba(34,197,94,0.1);color:#4ade80}
+.row-done:hover{background:rgba(34,197,94,0.2)}
+.row-cancel{background:rgba(239,68,68,0.1);color:#f87171}
+.row-cancel:hover{background:rgba(239,68,68,0.2)}
+.row-wa{background:rgba(37,211,102,0.1);color:#86efac}
+.row-wa:hover{background:rgba(37,211,102,0.2)}
+
+/* Delete link */
+.cp-delete{font-size:10px;color:rgba(239,68,68,0.4);text-decoration:underline;cursor:pointer;background:none;border:none}
+.cp-delete:hover{color:#f87171}
+
+/* HR */
+.cp-hr{border:none;border-top:1px solid rgba(255,255,255,0.05);margin:24px 0}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#111}
+::-webkit-scrollbar-thumb{background:#D4AF37;border-radius:4px}
+
+/* Responsive */
+@media(max-width:900px){
+  .cp-grid-3{grid-template-columns:1fr}
+  .cp-lg-span2{grid-column:span 1}
+}
+@media(max-width:640px){
+  .cp-grid-2{grid-template-columns:1fr}
+  .cp-grid-4{grid-template-columns:1fr 1fr}
+  .cp-text-2xl{font-size:22px}
+  .cp-text-xl{font-size:18px}
+  .cp-p6{padding:16px}
+  .cp-p8{padding:20px}
+  .booking-row{padding:10px 8px}
+}
+@media(max-width:400px){
+  .cp-grid-4{grid-template-columns:1fr 1fr}
+  .cp-text-2xl{font-size:20px}
+}

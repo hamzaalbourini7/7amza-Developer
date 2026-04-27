@@ -1,0 +1,485 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>لوحة التحكم | صالون حمادة دياب</title>
+  <link rel="manifest" href="manifest.json">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="cp-styles.css">
+</head>
+<body>
+
+  <!-- CONNECTION STATUS BAR -->
+  <div id="connBar" style="display:none;position:fixed;top:0;left:0;right:0;z-index:999;text-align:center;padding:4px;font-size:11px;font-weight:700"></div>
+
+  <!-- LOGIN SCREEN -->
+  <div id="loginScreen" class="login-wrap">
+    <div class="glass login-box">
+      <div class="cp-text-5xl cp-mb4">🔐</div>
+      <h1 class="cp-text-xl cp-black cp-mb6">لوحة الإدارة</h1>
+      <div class="cp-relative cp-mb3">
+        <input type="password" id="adminPass" placeholder="كلمة المرور"
+          class="cp-input cp-text-center cp-text-lg"
+          onkeydown="if(event.key==='Enter')adminLogin()">
+        <button onclick="toggleLoginPass()" type="button"
+          style="position:absolute;left:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#999;cursor:pointer">👁</button>
+      </div>
+      <p id="loginErr" class="cp-red cp-text-xs cp-mb4 hidden">كلمة المرور غير صحيحة</p>
+      <button onclick="adminLogin()" class="cp-btn cp-btn-gold" style="width:100%;padding:12px">دخول</button>
+      <p class="cp-text-xs cp-gray3 cp-mt4" id="connStatus">جاري الاتصال...</p>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
+    <nav class="glass cp-nav cp-sticky" style="border-radius:0">
+      <div style="max-width:1100px;margin:0 auto" class="cp-flex cp-between">
+        <div class="cp-flex cp-gap">
+          <span class="cp-text-lg cp-black gold-text">إدارة الصالون</span>
+          <span id="liveIndicator" style="width:8px;height:8px;border-radius:50%;background:#4ade80;display:inline-block;animation:blink 2s infinite"></span>
+        </div>
+        <button onclick="adminLogout()" class="cp-btn cp-btn-outline cp-text-xs">خروج</button>
+      </div>
+    </nav>
+
+    <main class="cp-wrap">
+      <!-- Stats Row -->
+      <div class="cp-grid cp-grid-3 cp-mb4" style="margin-bottom:24px">
+        <div class="cp-card cp-card-gold">
+          <h3 class="cp-text-sm cp-gray cp-mb4">حالة الحجز</h3>
+          <button id="toggleBookingBtn" onclick="toggleBooking()" class="cp-btn" style="width:100%"></button>
+          <div id="stopReasonBox" class="hidden cp-mt4">
+            <textarea id="stopReason" placeholder="سبب التوقف..." class="cp-input cp-text-xs" style="min-height:50px;resize:vertical"></textarea>
+            <button onclick="saveStopReason()" style="background:none;border:none;color:#D4AF37;cursor:pointer;font-size:10px;text-decoration:underline;margin-top:6px">حفظ</button>
+          </div>
+        </div>
+        <div class="cp-card" style="grid-column:span 2">
+          <div class="cp-grid cp-grid-4">
+            <div class="cp-text-center"><p class="cp-text-xs cp-gray3 cp-mb1">الإجمالي</p><p id="statTotal" class="cp-text-2xl cp-black">0</p></div>
+            <div class="cp-text-center"><p class="cp-text-xs cp-gray3 cp-mb1">اليوم</p><p id="statToday" class="cp-text-2xl cp-black cp-gold">0</p></div>
+            <div class="cp-text-center"><p class="cp-text-xs cp-gray3 cp-mb1">بانتظار</p><p id="statPending" class="cp-text-2xl cp-black cp-blue">0</p></div>
+            <div class="cp-text-center"><p class="cp-text-xs cp-gray3 cp-mb1">الدخل</p><p id="statRevenue" class="cp-text-2xl cp-black cp-green">0₪</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="cp-grid cp-grid-3" style="align-items:start">
+        <div style="grid-column:span 2">
+          <div class="cp-flex cp-between cp-mb3 cp-wrap-f cp-gap">
+            <h2 class="cp-text-lg cp-bold">الحجوزات</h2>
+            <div class="cp-flex cp-gap">
+              <input type="date" id="filterDate" onchange="renderBookings()" class="cp-input cp-text-xs" style="width:auto;padding:6px 10px">
+              <select id="filterStatus" onchange="renderBookings()" class="cp-input cp-text-xs" style="width:auto;padding:6px 10px">
+                <option value="">الكل</option>
+                <option value="new">جديد</option>
+                <option value="done">منتهي</option>
+                <option value="cancel">ملغي</option>
+              </select>
+            </div>
+          </div>
+          <div class="glass cp-overflow" id="bookingsList"><p class="cp-gray cp-text-sm cp-text-center" style="padding:32px">جاري التحميل...</p></div>
+          <div class="cp-text-center cp-py3">
+            <button onclick="clearAllBookings()" class="cp-delete">حذف كل الحجوزات</button>
+          </div>
+        </div>
+
+        <div class="cp-grid" style="gap:20px">
+          <div class="cp-card">
+            <h3 class="cp-bold cp-text-sm cp-mb4">الخدمات الأكثر طلباً</h3>
+            <div id="serviceChart" class="cp-grid" style="gap:12px"></div>
+          </div>
+          <div class="cp-card">
+            <h3 class="cp-bold cp-text-sm cp-mb4">إعدادات تليجرام 🔔</h3>
+            <div class="cp-grid" style="gap:10px">
+              <input type="text" id="tgToken" placeholder="Bot Token" class="cp-input cp-text-xs">
+              <input type="text" id="tgChatId" placeholder="Chat ID" class="cp-input cp-text-xs">
+              <div class="cp-flex cp-gap">
+                <button onclick="saveTelegramConfig()" class="cp-btn cp-btn-gold cp-text-xs cp-grow">حفظ</button>
+                <button onclick="testTelegram()" class="cp-btn cp-btn-outline cp-text-xs">فحص</button>
+              </div>
+            </div>
+            <hr class="cp-hr">
+            <h3 class="cp-bold cp-text-sm cp-mb3">كلمة السر 🔑</h3>
+            <div class="cp-grid" style="gap:10px">
+              <div class="cp-relative">
+                <input type="password" id="newAdminPass" placeholder="كلمة السر الجديدة" class="cp-input cp-text-xs">
+                <button onclick="toggleNewPass()" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:#666;cursor:pointer;font-size:10px">👁</button>
+              </div>
+              <button onclick="changePassword()" class="cp-btn cp-btn-blue cp-text-xs">تحديث</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <style>@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}</style>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+    // ===== CONFIG =====
+    var SB_URL = 'https://xsuxjjvjlxenfsvdjfmq.supabase.co';
+    var SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzdXhqanZqbHhlbmZzdmRqZm1xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjYzNzYsImV4cCI6MjA5MjgwMjM3Nn0.OX7ifLwUC2CFkiAOLbTx6NvCSyhQ0o7m01kEwmhjeJI';
+
+    var db = null;
+    var realtimeSub = null;
+    var allBookings = [];
+    var lastCount = 0;
+    var isOnline = false;
+
+    var SERVICES = [
+      { name: 'حلاقه شعر', price: 3, duration: 40, icon: '✂️' },
+      { name: 'لحيه', price: 2, duration: 20, icon: '🧔' },
+      { name: 'حلاقة اطفال', price: 3, duration: 30, icon: '👦' },
+      { name: 'تحديد', price: 2, duration: 15, icon: '💈' },
+      { name: 'سشوار', price: 2, duration: 15, icon: '💇' },
+      { name: 'بكج كامل', price: 15, duration: 60, icon: '👑' }
+    ];
+
+    // ===== SUPABASE INIT =====
+    function initDB() {
+      try {
+        if (typeof supabase !== 'undefined') {
+          db = supabase.createClient(SB_URL, SB_KEY);
+          isOnline = true;
+          showConn('متصل بالسيرفر ✅', '#4ade80');
+          document.getElementById('connStatus').textContent = 'متصل ✅';
+          document.getElementById('connStatus').style.color = '#4ade80';
+          return true;
+        }
+      } catch (e) {}
+      isOnline = false;
+      showConn('وضع أوفلاين ⚠️', '#f59e0b');
+      document.getElementById('connStatus').textContent = 'أوفلاين ⚠️';
+      document.getElementById('connStatus').style.color = '#f59e0b';
+      return false;
+    }
+
+    function showConn(msg, color) {
+      var bar = document.getElementById('connBar');
+      bar.textContent = msg;
+      bar.style.background = color;
+      bar.style.color = '#000';
+      bar.style.display = 'block';
+      setTimeout(function() { bar.style.display = 'none'; }, 3000);
+    }
+
+    // ===== REALTIME SUBSCRIPTION =====
+    function startRealtime() {
+      if (!db) return;
+      try {
+        realtimeSub = db.channel('bookings-changes')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings' }, function(payload) {
+            console.log('Realtime:', payload.eventType);
+            // New booking notification
+            if (payload.eventType === 'INSERT') {
+              playNotifySound();
+              showConn('🔔 حجز جديد!', '#D4AF37');
+            }
+            // Refresh everything
+            loadAllBookings();
+          })
+          .subscribe(function(status) {
+            console.log('Realtime status:', status);
+            var ind = document.getElementById('liveIndicator');
+            if (status === 'SUBSCRIBED') {
+              if (ind) ind.style.background = '#4ade80';
+            } else {
+              if (ind) ind.style.background = '#f87171';
+            }
+          });
+      } catch (e) {
+        console.warn('Realtime error:', e);
+      }
+    }
+
+    // ===== NOTIFICATION SOUND =====
+    var audioCtx = null;
+    function playNotifySound() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        var now = audioCtx.currentTime;
+        // Three-tone pleasant chime
+        var freqs = [659, 784, 1047]; // E5, G5, C6
+        freqs.forEach(function(freq, i) {
+          var osc = audioCtx.createOscillator();
+          var gain = audioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.25, now + i * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.5);
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.start(now + i * 0.12);
+          osc.stop(now + i * 0.12 + 0.5);
+        });
+      } catch (e) {}
+    }
+    // Unlock audio on first interaction (iOS/Android requirement)
+    function unlockAudio() {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var b = audioCtx.createBuffer(1, 1, 22050);
+        var s = audioCtx.createBufferSource();
+        s.buffer = b; s.connect(audioCtx.destination); s.start(0);
+      } catch (e) {}
+    }
+    document.addEventListener('touchstart', unlockAudio, { once: true });
+    document.addEventListener('click', unlockAudio, { once: true });
+
+    // ===== AUTH =====
+    function getAdminPass() { return localStorage.getItem('adminPassword') || 'hamada2026'; }
+    function adminLogin() {
+      if (document.getElementById('adminPass').value === getAdminPass()) {
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('dashboard').classList.remove('hidden');
+        initDashboard();
+      } else {
+        document.getElementById('loginErr').classList.remove('hidden');
+        document.getElementById('adminPass').value = '';
+      }
+    }
+    function adminLogout() {
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      if (realtimeSub) { try { db.removeChannel(realtimeSub); } catch(e){} }
+    }
+    function toggleLoginPass() { var f = document.getElementById('adminPass'); f.type = f.type === 'password' ? 'text' : 'password'; }
+
+    // ===== DASHBOARD INIT =====
+    function initDashboard() {
+      if (!db) initDB();
+      updateToggleBtn();
+      loadTelegramConfig();
+      document.getElementById('newAdminPass').value = getAdminPass();
+      setTodayFilter();
+      loadAllBookings();
+      startRealtime();
+      // Fallback polling every 10s in case realtime fails
+      setInterval(loadAllBookings, 10000);
+    }
+
+    function setTodayFilter() {
+      var d = new Date();
+      document.getElementById('filterDate').value = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+    }
+
+    // ===== LOAD BOOKINGS (single source of truth) =====
+    function loadAllBookings() {
+      if (db) {
+        db.from('bookings').select('*').then(function(res) {
+          if (!res.error && res.data) {
+            allBookings = res.data;
+            localStorage.setItem('hamzaSalonBookings', JSON.stringify(res.data));
+          } else {
+            allBookings = JSON.parse(localStorage.getItem('hamzaSalonBookings') || '[]');
+          }
+          refreshUI();
+        }).catch(function() {
+          allBookings = JSON.parse(localStorage.getItem('hamzaSalonBookings') || '[]');
+          refreshUI();
+        });
+      } else {
+        allBookings = JSON.parse(localStorage.getItem('hamzaSalonBookings') || '[]');
+        refreshUI();
+      }
+    }
+
+    function refreshUI() {
+      renderBookings();
+      renderStats();
+      renderServiceChart();
+    }
+
+    // ===== STATS =====
+    function renderStats() {
+      var d = new Date();
+      var today = d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+      var todayB = allBookings.filter(function(b) { return b.date === today; });
+      var revenue = 0;
+      todayB.forEach(function(b) {
+        if (b.status !== 'cancel') {
+          var sv = SERVICES.find(function(x) { return x.name === b.service; });
+          if (sv) revenue += sv.price;
+        }
+      });
+      document.getElementById('statTotal').textContent = allBookings.length;
+      document.getElementById('statToday').textContent = todayB.length;
+      document.getElementById('statPending').textContent = allBookings.filter(function(b) { return b.status === 'new' || !b.status; }).length;
+      document.getElementById('statRevenue').textContent = revenue + '₪';
+    }
+
+    function renderServiceChart() {
+      var counts = {};
+      allBookings.forEach(function(b) { counts[b.service] = (counts[b.service] || 0) + 1; });
+      var sorted = Object.entries(counts).sort(function(a, b) { return b[1] - a[1]; });
+      var max = sorted.length > 0 ? sorted[0][1] : 1;
+      var el = document.getElementById('serviceChart');
+      if (sorted.length === 0) { el.innerHTML = '<p class="cp-gray cp-text-sm cp-text-center">لا بيانات</p>'; return; }
+      el.innerHTML = sorted.map(function(item) {
+        var pct = Math.round((item[1] / max) * 100);
+        return '<div><div class="cp-flex cp-between cp-text-sm cp-mb1"><span>' + item[0] + '</span><span class="cp-gold cp-bold">' + item[1] + '</span></div><div class="cp-bar-bg"><div class="cp-bar" style="width:' + pct + '%"></div></div></div>';
+      }).join('');
+    }
+
+    // ===== BOOKINGS LIST =====
+    function renderBookings() {
+      var list = allBookings.slice();
+      var dateF = document.getElementById('filterDate').value;
+      var statusF = document.getElementById('filterStatus').value;
+      if (dateF) list = list.filter(function(b) { return b.date === dateF; });
+      if (statusF) list = list.filter(function(b) { return (b.status || 'new') === statusF; });
+      list.sort(function(a, b) { return a.time > b.time ? 1 : -1; });
+      var el = document.getElementById('bookingsList');
+      if (list.length === 0) {
+        el.innerHTML = '<p class="cp-gray cp-text-sm cp-text-center" style="padding:32px">لا توجد حجوزات</p>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < list.length; i++) {
+        var b = list[i];
+        var st = b.status || 'new';
+        var bc = st === 'done' ? 'badge-done' : st === 'cancel' ? 'badge-cancel' : 'badge-new';
+        var bt = st === 'done' ? 'منتهي' : st === 'cancel' ? 'ملغي' : 'جديد';
+        var ph = (b.phone || '').replace(/^0/, '');
+        html += '<div class="booking-row"><div class="cp-flex cp-between cp-gap" style="align-items:flex-start">' +
+          '<div class="cp-min0 cp-grow">' +
+            '<div class="cp-flex cp-gap cp-wrap-f cp-mb1"><span class="cp-bold cp-text-sm">' + (b.name||'') + '</span><span class="badge ' + bc + '">' + bt + '</span></div>' +
+            '<p class="cp-text-xs cp-gray">' + (b.service||'') + ' · ' + (b.time||'') + ' · ' + (b.date||'') + '</p>' +
+            '<a href="tel:' + (b.phone||'') + '" class="cp-text-xs cp-gold">' + (b.phone||'') + '</a>' +
+            (b.notes ? '<p class="cp-text-xs cp-gray3 cp-mt2">📝 ' + b.notes + '</p>' : '') +
+          '</div>' +
+          '<div class="row-actions cp-shrink0">' +
+            '<button onclick="setStatus(\'' + b.bookingid + '\',\'done\')" class="row-action row-done">✓ منتهي</button>' +
+            '<button onclick="setStatus(\'' + b.bookingid + '\',\'cancel\')" class="row-action row-cancel">✗ إلغاء</button>' +
+            '<a href="https://wa.me/962' + ph + '" target="_blank" class="row-action row-wa">واتساب</a>' +
+          '</div></div></div>';
+      }
+      el.innerHTML = html;
+    }
+
+    function setStatus(id, status) {
+      // Update local immediately
+      for (var i = 0; i < allBookings.length; i++) {
+        if (allBookings[i].bookingid === id) {
+          allBookings[i].status = status;
+          break;
+        }
+      }
+      localStorage.setItem('hamzaSalonBookings', JSON.stringify(allBookings));
+      refreshUI();
+      // Sync to cloud
+      if (db) {
+        db.from('bookings').update({ status: status }).eq('bookingid', id)
+          .then(function() {})
+          .catch(function(e) { console.warn('Update error:', e); });
+      }
+    }
+
+    function clearAllBookings() {
+      if (!confirm('حذف كل الحجوزات؟')) return;
+      allBookings = [];
+      localStorage.removeItem('hamzaSalonBookings');
+      refreshUI();
+      if (db) {
+        db.from('bookings').delete().neq('bookingid', '0')
+          .then(function() {}).catch(function() {});
+      }
+    }
+
+    // ===== BOOKING TOGGLE =====
+    function toggleBooking() {
+      var s = JSON.parse(localStorage.getItem('salonSettings') || '{}');
+      s.bookingOpen = !s.bookingOpen;
+      if (s.bookingOpen) s.closedReason = '';
+      localStorage.setItem('salonSettings', JSON.stringify(s));
+      updateToggleBtn();
+      if (db) {
+        db.from('settings').upsert([{ id: 'main', bookingOpen: s.bookingOpen, closedReason: s.closedReason || '' }], { onConflict: 'id' })
+          .then(function() {}).catch(function() {});
+      }
+    }
+    function saveStopReason() {
+      var s = JSON.parse(localStorage.getItem('salonSettings') || '{}');
+      s.closedReason = document.getElementById('stopReason').value;
+      localStorage.setItem('salonSettings', JSON.stringify(s));
+      alert('تم حفظ السبب');
+    }
+    function updateToggleBtn() {
+      var s = JSON.parse(localStorage.getItem('salonSettings') || '{"bookingOpen":true}');
+      var btn = document.getElementById('toggleBookingBtn');
+      if (s.bookingOpen) {
+        btn.textContent = '🟢 مفعّل - إيقاف';
+        btn.className = 'cp-btn cp-btn-green';
+        btn.style.width = '100%';
+        document.getElementById('stopReasonBox').classList.add('hidden');
+      } else {
+        btn.textContent = '🔴 متوقف - تفعيل';
+        btn.className = 'cp-btn cp-btn-red';
+        btn.style.width = '100%';
+        document.getElementById('stopReasonBox').classList.remove('hidden');
+      }
+    }
+
+    // ===== TELEGRAM =====
+    function loadTelegramConfig() {
+      var c = JSON.parse(localStorage.getItem('telegramConfig') || '{"token":"","chatId":""}');
+      document.getElementById('tgToken').value = c.token;
+      document.getElementById('tgChatId').value = c.chatId;
+    }
+    function saveTelegramConfig() {
+      localStorage.setItem('telegramConfig', JSON.stringify({
+        token: document.getElementById('tgToken').value.trim(),
+        chatId: document.getElementById('tgChatId').value.trim()
+      }));
+      alert('تم الحفظ');
+    }
+    function testTelegram() {
+      var t = document.getElementById('tgToken').value.trim();
+      var c = document.getElementById('tgChatId').value.trim();
+      if (!t || !c) { alert('أدخل التوكن والآيدي'); return; }
+      fetch('https://api.telegram.org/bot' + t + '/sendMessage', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: c, text: '👋 اختبار ناجح!', disable_notification: false })
+      }).then(function(r) { return r.json(); }).then(function(res) {
+        alert(res.ok ? 'تم الإرسال بنجاح!' : 'خطأ: ' + res.description);
+      }).catch(function() { alert('خطأ في الاتصال'); });
+    }
+
+    // ===== PASSWORD =====
+    function toggleNewPass() { var f = document.getElementById('newAdminPass'); f.type = f.type === 'password' ? 'text' : 'password'; }
+    function changePassword() {
+      var p = document.getElementById('newAdminPass').value.trim();
+      if (p.length < 4) { alert('قصيرة جداً'); return; }
+      localStorage.setItem('adminPassword', p);
+      alert('تم التحديث');
+    }
+
+    // ===== UTILS =====
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+
+    // ===== PWA REGISTRATION =====
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js').then(function() {
+          console.log('SW registered');
+        }).catch(function() {});
+      });
+    }
+
+    // ===== STARTUP =====
+    window.addEventListener('load', function() {
+      initDB();
+      // Retry connection if failed
+      if (!db) { setTimeout(initDB, 2000); setTimeout(initDB, 5000); }
+    });
+  </script>
+</body>
+</html>
